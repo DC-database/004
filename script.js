@@ -74,121 +74,201 @@ const sites = [
   {no: "SZRE", name: "Seven Zone Real Estate"}
 ];
 
+// DOM Elements
+const elements = {
+  form: document.getElementById('document-form'),
+  from: document.getElementById('from'),
+  site: document.getElementById('site'),
+  class: document.getElementById('class'),
+  dateSent: document.getElementById('dateSent'),
+  remarks: document.getElementById('remarks'),
+  submitBtn: document.getElementById('submit-btn'),
+  successMessage: document.getElementById('success-message')
+};
+
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
+  initializeForm();
+  setDefaultDate();
+});
+
+// Initialize form elements
+function initializeForm() {
   // Populate site dropdown
-  const siteSelect = document.getElementById('site');
-  sites.forEach(site => {
+  populateSiteDropdown();
+  
+  // Add form submit handler
+  elements.form.addEventListener('submit', handleFormSubmit);
+  
+  // Add button click handler as fallback
+  elements.submitBtn.addEventListener('click', handleFormSubmit);
+}
+
+// Populate site dropdown
+function populateSiteDropdown() {
+  sites.sort((a, b) => a.name.localeCompare(b.name)).forEach(site => {
     const option = document.createElement('option');
     option.value = `${site.no}|${site.name}`;
     option.textContent = `${site.no} - ${site.name}`;
-    siteSelect.appendChild(option);
+    elements.site.appendChild(option);
   });
+}
 
-  // Set default date to today
+// Set default date to today
+function setDefaultDate() {
   const today = new Date().toISOString().split('T')[0];
-  document.getElementById('dateSent').value = today;
+  elements.dateSent.value = today;
+}
 
-  // Add submit button event listener
-  document.getElementById('submit-btn').addEventListener('click', submitRequest);
-});
+// Handle form submission
+function handleFormSubmit(event) {
+  event.preventDefault();
+  submitRequest();
+}
 
 // Submit the form data
 function submitRequest() {
-  // Get form values
-  const from = document.getElementById('from').value.trim().toUpperCase();
-  const [siteNo, siteName] = document.getElementById('site').value.split('|');
-  const classValue = document.getElementById('class').value;
-  const dateSent = document.getElementById('dateSent').value;
-  const remarks = document.getElementById('remarks').value;
-
   // Validate inputs
-  if (!from || !siteNo || !classValue || !dateSent) {
-    showError('Please fill all required fields.');
+  if (!validateForm()) {
     return;
   }
 
-  // Show loading state
-  const submitBtn = document.getElementById('submit-btn');
-  submitBtn.disabled = true;
-  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+  // Prepare form data
+  const formData = getFormData();
 
-  // Prepare the request
-  const params = new URLSearchParams();
-  params.append('action', 'add');
-  params.append('from', from);
-  params.append('siteNo', siteNo);
-  params.append('siteName', siteName);
-  params.append('class', classValue);
-  params.append('dateSent', dateSent);
-  params.append('remarks', remarks);
+  // Show loading state
+  setLoadingState(true);
 
   // Send the request
-  fetch(`${scriptURL}?${params.toString()}`, {
+  fetch(`${scriptURL}?${new URLSearchParams(formData)}`, {
     method: 'POST',
   })
-  .then(res => res.json())
-  .then(data => {
-    if (data.status === 'ok') {
-      // Clean the message by removing "Ace" if it exists
-      const cleanMessage = data.message.replace('Ace” ', '');
-      showSuccess(cleanMessage);
-      resetForm();
-    } else {
-      showError(data.message || 'An error occurred while processing your request.');
-    }
-  })
-  .catch(error => {
-    showError('Network error. Please try again later.');
-    console.error('Error:', error);
-  })
-  .finally(() => {
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Generate Code';
-  });
+  .then(handleResponse)
+  .catch(handleError)
+  .finally(() => setLoadingState(false));
 }
 
-// Show success message
-function showSuccess(message) {
-  const successElement = document.getElementById('success-message');
-  const messageContent = successElement.querySelector('.message-content');
-  
-  // Highlight the code in the message
-  const formattedMessage = message.replace('Code: ', '<span class="code">Code: </span>');
-  messageContent.innerHTML = formattedMessage;
-  
-  successElement.classList.remove('hidden');
-  
-  // Scroll to the success message
-  successElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+// Validate form inputs
+function validateForm() {
+  if (!elements.from.value.trim() || 
+      !elements.site.value || 
+      !elements.class.value || 
+      !elements.dateSent.value) {
+    showError('Please fill all required fields.');
+    return false;
+  }
+  return true;
 }
+
+// Get form data as object
+function getFormData() {
+  const [siteNo, siteName] = elements.site.value.split('|');
+  
+  return {
+    action: 'add',
+    from: elements.from.value.trim().toUpperCase(),
+    siteNo: encodeURIComponent(siteNo),
+    siteName: encodeURIComponent(siteName),
+    class: encodeURIComponent(elements.class.value),
+    dateSent: encodeURIComponent(elements.dateSent.value),
+    remarks: encodeURIComponent(elements.remarks.value)
+  };
+}
+
+// Set loading state
+function setLoadingState(isLoading) {
+  elements.submitBtn.disabled = isLoading;
+  elements.submitBtn.innerHTML = isLoading 
+    ? '<i class="fas fa-spinner fa-spin"></i> Processing...' 
+    : '<i class="fas fa-paper-plane"></i> Generate Code';
+}
+
+// Handle response from server
+function handleResponse(response) {
+  return response.json()
+    .then(data => {
+      if (data.status === 'ok') {
+        const cleanMessage = data.message.replace('Ace” ', '');
+        showCodeConfirmation(cleanMessage);
+        resetForm();
+      } else {
+        showError(data.message || 'An error occurred while processing your request.');
+      }
+    });
+}
+
+// Handle errors
+function handleError(error) {
+  console.error('Error:', error);
+  showError('Network error. Please try again later.');
+}
+
+// Show code confirmation with animated parts
+function showCodeConfirmation(message) {
+  // Extract just the code part from the message
+  const code = message.includes('Code: ') 
+    ? message.split('Code: ')[1] 
+    : message;
+  
+  // Create the HTML for the code display
+  const codeHTML = `
+    <div class="code-display">
+      <div class="code-header">
+        <i class="fas fa-check-circle"></i> Your Document Code
+      </div>
+      <div class="code-value">${code}</div>
+      <div class="code-explanation">
+        This code has been generated and recorded in the system.
+      </div>
+      <button class="copy-btn" onclick="copyToClipboard('${code}')">
+        <i class="fas fa-copy"></i> Copy Code
+      </button>
+    </div>
+  `;
+  
+  elements.successMessage.innerHTML = codeHTML;
+  elements.successMessage.classList.remove('hidden');
+  elements.successMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Copy to clipboard function
+window.copyToClipboard = function(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    if (btn) {
+      btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.innerHTML = '<i class="fas fa-copy"></i> Copy Code';
+        btn.classList.remove('copied');
+      }, 2000);
+    }
+  }).catch(err => {
+    console.error('Failed to copy: ', err);
+  });
+};
 
 // Show error message
 function showError(message) {
-  const successElement = document.getElementById('success-message');
-  const messageContent = successElement.querySelector('.message-content');
+  elements.successMessage.innerHTML = `
+    <div class="error-message">
+      <i class="fas fa-exclamation-circle"></i> ${message}
+    </div>
+  `;
   
-  successElement.style.backgroundColor = 'var(--error-color)';
-  messageContent.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
-  successElement.classList.remove('hidden');
-  
-  // Reset to success color after 5 seconds
+  elements.successMessage.classList.remove('hidden');
+  elements.successMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  // Hide error after 5 seconds
   setTimeout(() => {
-    successElement.style.backgroundColor = 'var(--success-color)';
-    successElement.classList.add('hidden');
+    elements.successMessage.classList.add('hidden');
   }, 5000);
-  
-  // Scroll to the error message
-  successElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-// Reset the form after successful submission
+// Reset the form
 function resetForm() {
-  document.getElementById('from').value = '';
-  document.getElementById('site').value = '';
-  document.getElementById('class').value = '';
-  document.getElementById('remarks').value = '';
-  
-  // Set focus back to the first field
-  document.getElementById('from').focus();
+  elements.form.reset();
+  setDefaultDate();
+  elements.from.value = "IBA"; // Reset to default but keep editable
+  elements.from.focus();
 }
