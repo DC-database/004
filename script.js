@@ -90,6 +90,15 @@ const elements = {
 document.addEventListener('DOMContentLoaded', function() {
   initializeForm();
   setDefaultDate();
+  
+  // Add touch-specific event listeners
+  elements.submitBtn.addEventListener('touchstart', function(e) {
+    this.classList.add('touch-active');
+  }, {passive: true});
+  
+  elements.submitBtn.addEventListener('touchend', function(e) {
+    this.classList.remove('touch-active');
+  }, {passive: true});
 });
 
 // Initialize form elements
@@ -123,6 +132,12 @@ function setDefaultDate() {
 // Handle form submission
 function handleFormSubmit(event) {
   event.preventDefault();
+  
+  // Blur any focused element to dismiss mobile keyboard
+  if (document.activeElement) {
+    document.activeElement.blur();
+  }
+  
   submitRequest();
 }
 
@@ -133,19 +148,41 @@ function submitRequest() {
     return;
   }
 
+  // Check if online (for mobile)
+  if (!navigator.onLine) {
+    showError('No internet connection. Please check your network and try again.');
+    return;
+  }
+
   // Prepare form data
   const formData = getFormData();
 
   // Show loading state
   setLoadingState(true);
 
-  // Send the request
-  fetch(`${scriptURL}?${new URLSearchParams(formData)}`, {
+  // Send the request with timeout for mobile
+  const timeout = 30000; // 30 seconds timeout for mobile
+  
+  const fetchPromise = fetch(`${scriptURL}?${new URLSearchParams(formData)}`, {
     method: 'POST',
-  })
-  .then(handleResponse)
-  .catch(handleError)
-  .finally(() => setLoadingState(false));
+  });
+  
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => {
+      reject(new Error('Request timeout. Please try again.'));
+    }, timeout);
+  });
+
+  Promise.race([fetchPromise, timeoutPromise])
+    .then(handleResponse)
+    .catch(error => {
+      if (error.message === 'Request timeout. Please try again.') {
+        showError(error.message);
+      } else {
+        handleError(error);
+      }
+    })
+    .finally(() => setLoadingState(false));
 }
 
 // Validate form inputs

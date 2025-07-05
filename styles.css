@@ -15,6 +15,8 @@
   padding: 0;
   box-sizing: border-box;
   font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
 }
 
 body {
@@ -126,6 +128,7 @@ body {
   border-radius: var(--border-radius);
   font-size: 1rem;
   transition: var(--transition);
+  min-height: 48px;
 }
 
 .form-group input:focus,
@@ -133,6 +136,21 @@ body {
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 0.2rem rgba(0, 86, 179, 0.25);
+}
+
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230056b3'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.5rem;
+  padding-right: 3rem !important;
+}
+
+input[type="date"] {
+  min-height: 48px;
 }
 
 .form-actions {
@@ -144,7 +162,7 @@ body {
   color: white;
   border: none;
   border-radius: var(--border-radius);
-  padding: 0.875rem 1.5rem;
+  padding: 1rem 1.5rem;
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
@@ -154,6 +172,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
+  min-height: 48px;
 }
 
 .primary-btn:hover {
@@ -167,6 +186,11 @@ body {
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+}
+
+.touch-active {
+  transform: scale(0.98) !important;
+  opacity: 0.9 !important;
 }
 
 /* Code Confirmation Styles */
@@ -230,7 +254,7 @@ body {
   color: white;
   border: none;
   border-radius: var(--border-radius);
-  padding: 0.75rem 1.5rem;
+  padding: 1rem 1.5rem;
   font-size: 1rem;
   margin-top: 1.5rem;
   cursor: pointer;
@@ -308,6 +332,10 @@ body {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  html {
+    -webkit-overflow-scrolling: touch;
+  }
+  
   .app-header {
     padding: 1rem;
   }
@@ -329,6 +357,10 @@ body {
   .code-value {
     font-size: 1.2rem;
     padding: 0.75rem;
+  }
+  
+  input, select, textarea {
+    font-size: 16px !important;
   }
 }
 
