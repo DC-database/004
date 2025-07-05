@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>LETTER CODE GENERATOR</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h2>LETTER CODE GENERATOR</h2>
+    <!-- Success message will appear here dynamically -->
+    <label>From: <input id="from" type="text" required /></label><br>
+    <label>Site: 
+      <select id="site" required>
+        <option value="">-- Select Site --</option>
+        <!-- Options will be populated by JavaScript -->
+      </select>
+    </label><br>
+    <label>Class: 
+      <select id="class" required>
+        <option value="">-- Select Class --</option>
+        <option value="LET">LET</option>
+        <option value="MEM">MEM</option>
+        <option value="REP">REP</option>
+        <option value="CTR">CTR</option>
+        <option value="NOT">NOT</option>
+        <option value="WNG">WNG</option>
+        <option value="TEN">TEN</option>
+      </select>
+    </label><br>
+    <label>Date Sent: <input id="dateSent" type="date" required /></label><br>
+    <label>Remarks: <input id="remarks" type="text" /></label><br>
+    <button onclick="submitRequest()">Submit Document</button>
+
+    <div id="message"></div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
