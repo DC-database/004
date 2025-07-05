@@ -1,38 +1,101 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>LETTER CODE GENERATOR</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LETTER CODE GENERATOR | IBA</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-  <div class="container">
-    <h2>LETTER CODE GENERATOR</h2>
-    <!-- Success message will appear here dynamically -->
-    <label>From: <input id="from" type="text" required /></label><br>
-    <label>Site: 
-      <select id="site" required>
-        <option value="">-- Select Site --</option>
-        <!-- Options will be populated by JavaScript -->
-      </select>
-    </label><br>
-    <label>Class: 
-      <select id="class" required>
-        <option value="">-- Select Class --</option>
-        <option value="LET">LET</option>
-        <option value="MEM">MEM</option>
-        <option value="REP">REP</option>
-        <option value="CTR">CTR</option>
-        <option value="NOT">NOT</option>
-        <option value="WNG">WNG</option>
-        <option value="TEN">TEN</option>
-      </select>
-    </label><br>
-    <label>Date Sent: <input id="dateSent" type="date" required /></label><br>
-    <label>Remarks: <input id="remarks" type="text" /></label><br>
-    <button onclick="submitRequest()">Submit Document</button>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="logo-container">
+        <div class="logo-icon">
+          <i class="fas fa-file-contract"></i>
+        </div>
+        <div class="logo-text">
+          <h1>Letter Code Generator</h1>
+          <p>IBA Document Management System</p>
+        </div>
+      </div>
+    </header>
 
-    <div id="message"></div>
+    <main class="app-content">
+      <div class="form-card">
+        <div class="card-header">
+          <h2><i class="fas fa-plus-circle"></i> New Document Request</h2>
+        </div>
+        
+        <div class="form-body">
+          <div id="success-message" class="success-message hidden">
+            <i class="fas fa-check-circle"></i>
+            <div class="message-content"></div>
+          </div>
+
+          <form id="document-form">
+            <div class="form-group">
+              <label for="from">
+                <i class="fas fa-user-tie"></i> From
+              </label>
+              <input type="text" id="from" required placeholder="Enter your name">
+            </div>
+
+            <div class="form-group">
+              <label for="site">
+                <i class="fas fa-building"></i> Site
+              </label>
+              <select id="site" required>
+                <option value="">-- Select Site --</option>
+                <!-- Options populated by JavaScript -->
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="class">
+                <i class="fas fa-tag"></i> Document Class
+              </label>
+              <select id="class" required>
+                <option value="">-- Select Class --</option>
+                <option value="LET">LET - Letter</option>
+                <option value="MEM">MEM - Memorandum</option>
+                <option value="REP">REP - Report</option>
+                <option value="CTR">CTR - Contract</option>
+                <option value="NOT">NOT - Notice</option>
+                <option value="WNG">WNG - Warning</option>
+                <option value="TEN">TEN - Tender</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="dateSent">
+                <i class="fas fa-calendar-alt"></i> Date Sent
+              </label>
+              <input type="date" id="dateSent" required>
+            </div>
+
+            <div class="form-group">
+              <label for="remarks">
+                <i class="fas fa-comment-alt"></i> Remarks (Optional)
+              </label>
+              <input type="text" id="remarks" placeholder="Additional notes">
+            </div>
+
+            <div class="form-actions">
+              <button type="button" id="submit-btn" class="primary-btn">
+                <i class="fas fa-paper-plane"></i> Generate Code
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <footer class="app-footer">
+      <p>© 2023 IBA Document Management System | v2.0</p>
+    </footer>
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>

@@ -1,6 +1,7 @@
+// Google Apps Script URL
 const scriptURL = 'https://script.google.com/macros/s/AKfycbwqdCaI3oAeJ3VCjgwGGqx0Xs4viSTX-ljts4eVEjSX_W_Epb8b1KuWWt8GcT4LkplGFA/exec';
 
-// Load sites from CSV data
+// Site data
 const sites = [
   {no: "100", name: "Main Office"},
   {no: "121", name: "Ain Khalid Gate"},
@@ -73,8 +74,9 @@ const sites = [
   {no: "SZRE", name: "Seven Zone Real Estate"}
 ];
 
-// Populate site dropdown on page load
+// Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
+  // Populate site dropdown
   const siteSelect = document.getElementById('site');
   sites.forEach(site => {
     const option = document.createElement('option');
@@ -86,9 +88,14 @@ document.addEventListener('DOMContentLoaded', function() {
   // Set default date to today
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('dateSent').value = today;
+
+  // Add submit button event listener
+  document.getElementById('submit-btn').addEventListener('click', submitRequest);
 });
 
+// Submit the form data
 function submitRequest() {
+  // Get form values
   const from = document.getElementById('from').value.trim().toUpperCase();
   const [siteNo, siteName] = document.getElementById('site').value.split('|');
   const classValue = document.getElementById('class').value;
@@ -97,48 +104,91 @@ function submitRequest() {
 
   // Validate inputs
   if (!from || !siteNo || !classValue || !dateSent) {
-    const msg = document.getElementById('message');
-    msg.style.color = 'red';
-    msg.innerText = 'Please fill all required fields.';
+    showError('Please fill all required fields.');
     return;
   }
 
-  fetch(`${scriptURL}?action=add&from=${encodeURIComponent(from)}&siteNo=${encodeURIComponent(siteNo)}&siteName=${encodeURIComponent(siteName)}&class=${encodeURIComponent(classValue)}&dateSent=${encodeURIComponent(dateSent)}&remarks=${encodeURIComponent(remarks)}`, {
+  // Show loading state
+  const submitBtn = document.getElementById('submit-btn');
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+  // Prepare the request
+  const params = new URLSearchParams();
+  params.append('action', 'add');
+  params.append('from', from);
+  params.append('siteNo', siteNo);
+  params.append('siteName', siteName);
+  params.append('class', classValue);
+  params.append('dateSent', dateSent);
+  params.append('remarks', remarks);
+
+  // Send the request
+  fetch(`${scriptURL}?${params.toString()}`, {
     method: 'POST',
   })
   .then(res => res.json())
   .then(data => {
-    // Remove any existing messages
-    const existingMsg = document.querySelector('.success-message');
-    if (existingMsg) existingMsg.remove();
-    
-    const errorMsg = document.getElementById('message');
-    errorMsg.innerText = '';
-
     if (data.status === 'ok') {
-      // Create and show success message - Remove "Ace" if it exists
+      // Clean the message by removing "Ace" if it exists
       const cleanMessage = data.message.replace('Ace” ', '');
-      const successMsg = document.createElement('div');
-      successMsg.className = 'success-message';
-      successMsg.innerHTML = cleanMessage.replace('Code: ', '<span class="code-highlight">Code: </span>');
-      
-      // Insert after the header
-      const container = document.querySelector('.container');
-      container.insertBefore(successMsg, container.children[1]);
-      
-      // Clear form
-      document.getElementById('from').value = '';
-      document.getElementById('site').value = '';
-      document.getElementById('class').value = '';
-      document.getElementById('remarks').value = '';
+      showSuccess(cleanMessage);
+      resetForm();
     } else {
-      errorMsg.style.color = 'red';
-      errorMsg.innerText = data.message;
+      showError(data.message || 'An error occurred while processing your request.');
     }
-})
+  })
   .catch(error => {
-    const msg = document.getElementById('message');
-    msg.style.color = 'red';
-    msg.innerText = 'Error submitting document.';
+    showError('Network error. Please try again later.');
+    console.error('Error:', error);
+  })
+  .finally(() => {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Generate Code';
   });
+}
+
+// Show success message
+function showSuccess(message) {
+  const successElement = document.getElementById('success-message');
+  const messageContent = successElement.querySelector('.message-content');
+  
+  // Highlight the code in the message
+  const formattedMessage = message.replace('Code: ', '<span class="code">Code: </span>');
+  messageContent.innerHTML = formattedMessage;
+  
+  successElement.classList.remove('hidden');
+  
+  // Scroll to the success message
+  successElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Show error message
+function showError(message) {
+  const successElement = document.getElementById('success-message');
+  const messageContent = successElement.querySelector('.message-content');
+  
+  successElement.style.backgroundColor = 'var(--error-color)';
+  messageContent.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+  successElement.classList.remove('hidden');
+  
+  // Reset to success color after 5 seconds
+  setTimeout(() => {
+    successElement.style.backgroundColor = 'var(--success-color)';
+    successElement.classList.add('hidden');
+  }, 5000);
+  
+  // Scroll to the error message
+  successElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Reset the form after successful submission
+function resetForm() {
+  document.getElementById('from').value = '';
+  document.getElementById('site').value = '';
+  document.getElementById('class').value = '';
+  document.getElementById('remarks').value = '';
+  
+  // Set focus back to the first field
+  document.getElementById('from').focus();
 }
