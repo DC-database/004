@@ -1,5 +1,5 @@
 // Google Apps Script URL
-const scriptURL = 'https://script.google.com/macros/s/AKfycbwqdCaI3oAeJ3VCjgwGGqx0Xs4viSTX-ljts4eVEjSX_W_Epb8b1KuWWt8GcT4LkplGFA/exec';
+const scriptURL = 'https://script.google.com/macros/s/AKfycbwQLmkltVKnlt4ir0-5bYg8K4gvhAxJmvQAJB_uoClyQMSBR-U1Fgu7HQ1IyCy2igqI8w/exec';
 
 // Site data
 const sites = [
@@ -87,6 +87,13 @@ const documentClasses = [
 
 // DOM Elements
 const elements = {
+  mobileModal: document.getElementById('mobile-modal'),
+  mobileInput: document.getElementById('mobile-input'),
+  verifyBtn: document.getElementById('verify-btn'),
+  mobileError: document.getElementById('mobile-error'),
+  unregisteredMessage: document.getElementById('unregistered-message'),
+  whatsappBtn: document.getElementById('whatsapp-btn'),
+  appContainer: document.querySelector('.app-container'),
   form: document.getElementById('document-form'),
   from: document.getElementById('from'),
   site: document.getElementById('site'),
@@ -99,10 +106,29 @@ const elements = {
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
+  const verifiedMobile = sessionStorage.getItem('verifiedMobile');
+  
+  if (verifiedMobile) {
+    showApp();
+  } else {
+    showMobileVerification();
+  }
+  
+  elements.verifyBtn.addEventListener('click', verifyMobile);
+  elements.whatsappBtn.addEventListener('click', openWhatsApp);
+});
+
+function showMobileVerification() {
+  elements.mobileModal.style.display = 'flex';
+  elements.appContainer.classList.add('hidden');
+}
+
+function showApp() {
+  elements.mobileModal.style.display = 'none';
+  elements.appContainer.classList.remove('hidden');
   initializeForm();
   setDefaultDate();
   
-  // Add touch-specific event listeners
   elements.submitBtn.addEventListener('touchstart', function(e) {
     this.classList.add('touch-active');
   }, {passive: true});
@@ -110,22 +136,75 @@ document.addEventListener('DOMContentLoaded', function() {
   elements.submitBtn.addEventListener('touchend', function(e) {
     this.classList.remove('touch-active');
   }, {passive: true});
-});
+}
 
-// Initialize form elements
+function verifyMobile() {
+  const mobile = elements.mobileInput.value.trim();
+  
+  if (!mobile) {
+    showMobileError('Please enter your mobile number');
+    return;
+  }
+  
+  if (!/^[0-9]{8,12}$/.test(mobile)) {
+    showMobileError('Please enter a valid mobile number');
+    return;
+  }
+  
+  setMobileLoadingState(true);
+  
+  fetch(`${scriptURL}?action=verifyMobile&mobile=${encodeURIComponent(mobile)}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === 'ok') {
+        if (data.registered) {
+          sessionStorage.setItem('verifiedMobile', mobile);
+          showApp();
+        } else {
+          elements.unregisteredMessage.classList.remove('hidden');
+          elements.verifyBtn.classList.add('hidden');
+        }
+      } else {
+        showMobileError(data.message || 'Verification failed');
+      }
+    })
+    .catch(error => {
+      showMobileError('Network error. Please try again.');
+      console.error('Error:', error);
+    })
+    .finally(() => setMobileLoadingState(false));
+}
+
+function setMobileLoadingState(isLoading) {
+  elements.verifyBtn.disabled = isLoading;
+  elements.verifyBtn.innerHTML = isLoading 
+    ? '<i class="fas fa-spinner fa-spin"></i> Verifying...' 
+    : '<i class="fas fa-check-circle"></i> Verify';
+}
+
+function showMobileError(message) {
+  elements.mobileError.textContent = message;
+  elements.mobileError.classList.remove('hidden');
+  setTimeout(() => {
+    elements.mobileError.classList.add('hidden');
+  }, 5000);
+}
+
+function openWhatsApp() {
+  const phone = '50992023';
+  const message = 'Please register my mobile number for IBA Document System access. My number is: ' + elements.mobileInput.value.trim();
+  const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  window.open(url, '_blank');
+}
+
 function initializeForm() {
-  // Convert select inputs to autocomplete
   convertToAutocomplete('site', sites.map(site => `${site.no} - ${site.name}`));
   convertToAutocomplete('class', documentClasses.map(doc => `${doc.code} - ${doc.name}`));
   
-  // Add form submit handler
   elements.form.addEventListener('submit', handleFormSubmit);
-  
-  // Add button click handler as fallback
   elements.submitBtn.addEventListener('click', handleFormSubmit);
 }
 
-// Convert select input to autocomplete with manual typing
 function convertToAutocomplete(elementId, items) {
   const input = document.getElementById(elementId);
   const originalSelect = input.cloneNode(true);
@@ -133,7 +212,6 @@ function convertToAutocomplete(elementId, items) {
   originalSelect.classList.add('hidden');
   input.parentNode.insertBefore(originalSelect, input.nextSibling);
   
-  // Set up autocomplete
   input.addEventListener('input', function() {
     const val = this.value.trim();
     closeAllLists();
@@ -169,7 +247,6 @@ function convertToAutocomplete(elementId, items) {
     });
   });
   
-  // Close autocomplete when clicking outside
   document.addEventListener('click', function(e) {
     if (e.target !== input) {
       closeAllLists();
@@ -177,7 +254,6 @@ function convertToAutocomplete(elementId, items) {
   });
 }
 
-// Close all autocomplete lists
 function closeAllLists() {
   const items = document.getElementsByClassName('autocomplete-items');
   for (let i = 0; i < items.length; i++) {
@@ -185,17 +261,14 @@ function closeAllLists() {
   }
 }
 
-// Set default date to today
 function setDefaultDate() {
   const today = new Date().toISOString().split('T')[0];
   elements.dateSent.value = today;
 }
 
-// Handle form submission
 function handleFormSubmit(event) {
   event.preventDefault();
   
-  // Blur any focused element to dismiss mobile keyboard
   if (document.activeElement) {
     document.activeElement.blur();
   }
@@ -203,27 +276,20 @@ function handleFormSubmit(event) {
   submitRequest();
 }
 
-// Submit the form data
 function submitRequest() {
-  // Validate inputs
   if (!validateForm()) {
     return;
   }
 
-  // Check if online (for mobile)
   if (!navigator.onLine) {
     showError('No internet connection. Please check your network and try again.');
     return;
   }
 
-  // Prepare form data
   const formData = getFormData();
-
-  // Show loading state
   setLoadingState(true);
 
-  // Send the request with timeout for mobile
-  const timeout = 30000; // 30 seconds timeout for mobile
+  const timeout = 30000;
   
   const fetchPromise = fetch(`${scriptURL}?${new URLSearchParams(formData)}`, {
     method: 'POST',
@@ -247,7 +313,6 @@ function submitRequest() {
     .finally(() => setLoadingState(false));
 }
 
-// Validate form inputs
 function validateForm() {
   if (!elements.from.value.trim() || 
       !elements.site.value || 
@@ -259,21 +324,16 @@ function validateForm() {
   return true;
 }
 
-// Get form data as object
 function getFormData() {
-  // For site, try to extract the site number from the input
   let siteNo = '';
   let siteName = '';
   
-  // Check if the input matches the pattern "number - name"
   const siteMatch = elements.site.value.match(/^(\S+)\s*-\s*(.+)$/);
   if (siteMatch) {
     siteNo = siteMatch[1];
     siteName = siteMatch[2];
   } else {
-    // If not in the standard format, use the whole input as name
     siteName = elements.site.value;
-    // Try to find a matching site in our list
     const foundSite = sites.find(site => 
       site.name.toLowerCase() === elements.site.value.toLowerCase() ||
       site.no.toLowerCase() === elements.site.value.toLowerCase()
@@ -284,13 +344,11 @@ function getFormData() {
     }
   }
   
-  // Similarly for document class
   let docClass = '';
   const classMatch = elements.class.value.match(/^(\S+)\s*-\s*/);
   if (classMatch) {
     docClass = classMatch[1];
   } else {
-    // Try to find a matching class in our list
     const foundClass = documentClasses.find(dc => 
       dc.name.toLowerCase() === elements.class.value.toLowerCase() ||
       dc.code.toLowerCase() === elements.class.value.toLowerCase()
@@ -313,7 +371,6 @@ function getFormData() {
   };
 }
 
-// Set loading state
 function setLoadingState(isLoading) {
   elements.submitBtn.disabled = isLoading;
   elements.submitBtn.innerHTML = isLoading 
@@ -321,7 +378,6 @@ function setLoadingState(isLoading) {
     : '<i class="fas fa-paper-plane"></i> Generate Code';
 }
 
-// Handle response from server
 function handleResponse(response) {
   return response.json()
     .then(data => {
@@ -335,20 +391,16 @@ function handleResponse(response) {
     });
 }
 
-// Handle errors
 function handleError(error) {
   console.error('Error:', error);
   showError('Network error. Please try again later.');
 }
 
-// Show code confirmation with animated parts
 function showCodeConfirmation(message) {
-  // Extract just the code part from the message
   const code = message.includes('Code: ') 
     ? message.split('Code: ')[1] 
     : message;
   
-  // Create the HTML for the code display
   const codeHTML = `
     <div class="code-display">
       <div class="code-header">
@@ -369,7 +421,6 @@ function showCodeConfirmation(message) {
   elements.successMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-// Copy to clipboard function
 window.copyToClipboard = function(text) {
   navigator.clipboard.writeText(text).then(() => {
     const btn = document.querySelector('.copy-btn');
@@ -386,7 +437,6 @@ window.copyToClipboard = function(text) {
   });
 };
 
-// Show error message
 function showError(message) {
   elements.successMessage.innerHTML = `
     <div class="error-message">
@@ -397,16 +447,14 @@ function showError(message) {
   elements.successMessage.classList.remove('hidden');
   elements.successMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-  // Hide error after 5 seconds
   setTimeout(() => {
     elements.successMessage.classList.add('hidden');
   }, 5000);
 }
 
-// Reset the form
 function resetForm() {
   elements.form.reset();
   setDefaultDate();
-  elements.from.value = "IBA"; // Reset to default but keep editable
+  elements.from.value = "IBA";
   elements.from.focus();
 }

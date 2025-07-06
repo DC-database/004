@@ -11,7 +11,33 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-  <div class="app-container">
+  <div id="mobile-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-mobile-alt"></i> Employee Verification</h3>
+      </div>
+      <div class="modal-body">
+        <p>Please enter your registered mobile number to access the system:</p>
+        <div class="form-group">
+          <input type="tel" id="mobile-input" placeholder="974XXXXXXXX" pattern="[0-9]{8,12}" required>
+        </div>
+        <div id="mobile-error" class="error-message hidden"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="verify-btn" class="primary-btn">
+          <i class="fas fa-check-circle"></i> Verify
+        </button>
+      </div>
+      <div id="unregistered-message" class="hidden">
+        <p>You are not a registered employee. Please contact 50992023 via WhatsApp to request access.</p>
+        <button id="whatsapp-btn" class="whatsapp-btn">
+          <i class="fab fa-whatsapp"></i> Contact via WhatsApp
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-container hidden">
     <header class="app-header">
       <div class="logo-container">
         <div class="logo-icon">
@@ -82,7 +108,7 @@
     </main>
 
     <footer class="app-footer">
-      <p>© 2025 IBA Document Management System | v2.2</p>
+      <p>© 2025 IBA Document Management System | v2.3</p>
     </footer>
   </div>
 
