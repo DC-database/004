@@ -106,7 +106,8 @@ const elements = {
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
-  const verifiedMobile = sessionStorage.getItem('verifiedMobile');
+  // Check if mobile is already verified (using localStorage instead of sessionStorage for better mobile support)
+  const verifiedMobile = localStorage.getItem('verifiedMobile');
   
   if (verifiedMobile) {
     showApp();
@@ -114,13 +115,27 @@ document.addEventListener('DOMContentLoaded', function() {
     showMobileVerification();
   }
   
+  // Mobile-friendly event listeners
   elements.verifyBtn.addEventListener('click', verifyMobile);
   elements.whatsappBtn.addEventListener('click', openWhatsApp);
+  
+  // Touch events for mobile
+  if ('ontouchstart' in window) {
+    elements.verifyBtn.addEventListener('touchstart', function(e) {
+      this.classList.add('touch-active');
+    }, {passive: true});
+    
+    elements.verifyBtn.addEventListener('touchend', function(e) {
+      this.classList.remove('touch-active');
+    }, {passive: true});
+  }
 });
 
 function showMobileVerification() {
   elements.mobileModal.style.display = 'flex';
   elements.appContainer.classList.add('hidden');
+  // Focus on mobile input for better mobile UX
+  setTimeout(() => elements.mobileInput.focus(), 300);
 }
 
 function showApp() {
@@ -128,14 +143,6 @@ function showApp() {
   elements.appContainer.classList.remove('hidden');
   initializeForm();
   setDefaultDate();
-  
-  elements.submitBtn.addEventListener('touchstart', function(e) {
-    this.classList.add('touch-active');
-  }, {passive: true});
-  
-  elements.submitBtn.addEventListener('touchend', function(e) {
-    this.classList.remove('touch-active');
-  }, {passive: true});
 }
 
 function verifyMobile() {
@@ -146,19 +153,31 @@ function verifyMobile() {
     return;
   }
   
+  // Mobile-friendly validation (accepts numbers with or without country code)
   if (!/^[0-9]{8,12}$/.test(mobile)) {
-    showMobileError('Please enter a valid mobile number');
+    showMobileError('Please enter a valid 8-12 digit mobile number');
     return;
   }
   
   setMobileLoadingState(true);
   
-  fetch(`${scriptURL}?action=verifyMobile&mobile=${encodeURIComponent(mobile)}`)
-    .then(response => response.json())
+  // Mobile-friendly fetch with timeout
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+  
+  fetch(`${scriptURL}?action=verifyMobile&mobile=${encodeURIComponent(mobile)}`, {
+    signal: controller.signal
+  })
+    .then(response => {
+      clearTimeout(timeout);
+      if (!response.ok) throw new Error('Network response was not ok');
+      return response.json();
+    })
     .then(data => {
       if (data.status === 'ok') {
         if (data.registered) {
-          sessionStorage.setItem('verifiedMobile', mobile);
+          // Use localStorage for better mobile support
+          localStorage.setItem('verifiedMobile', mobile);
           showApp();
         } else {
           elements.unregisteredMessage.classList.remove('hidden');
@@ -169,11 +188,14 @@ function verifyMobile() {
       }
     })
     .catch(error => {
-      showMobileError('Network error. Please try again.');
-      console.error('Error:', error);
+      clearTimeout(timeout);
+      showMobileError(error.message.includes('aborted') 
+        ? 'Request timeout. Please try again.' 
+        : 'Network error. Please try again.');
     })
     .finally(() => setMobileLoadingState(false));
 }
+
 
 function setMobileLoadingState(isLoading) {
   elements.verifyBtn.disabled = isLoading;

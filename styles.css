@@ -507,3 +507,44 @@ input[type="date"] {
     max-height: 120px;
   }
 }
+/* Mobile-specific fixes */
+@media (max-width: 768px) {
+  /* Ensure mobile keyboard doesn't cover inputs */
+  .modal-content {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw;
+    max-height: 80vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Prevent zooming on input focus */
+  input, select, textarea {
+    font-size: 16px !important;
+    touch-action: manipulation;
+  }
+  
+  /* Better mobile number input */
+  input[type="tel"] {
+    inputmode: numeric;
+  }
+  
+  /* Mobile viewport height fix */
+  .modal {
+    align-items: flex-start;
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+}
+
+/* iOS specific fixes */
+@supports (-webkit-touch-callout: none) {
+  .modal-content {
+    max-height: 80vh;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+}
