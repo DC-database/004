@@ -74,6 +74,17 @@ const sites = [
   {no: "SZRE", name: "Seven Zone Real Estate"}
 ];
 
+// Document classes
+const documentClasses = [
+  {code: "LET", name: "Letter"},
+  {code: "MEM", name: "Memorandum"},
+  {code: "REP", name: "Report"},
+  {code: "CTR", name: "Contract"},
+  {code: "NOT", name: "Notice"},
+  {code: "WNG", name: "Warning"},
+  {code: "TEN", name: "Tender"}
+];
+
 // DOM Elements
 const elements = {
   form: document.getElementById('document-form'),
@@ -103,8 +114,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Initialize form elements
 function initializeForm() {
-  // Populate site dropdown
-  populateSiteDropdown();
+  // Convert select inputs to autocomplete
+  convertToAutocomplete('site', sites.map(site => `${site.no} - ${site.name}`));
+  convertToAutocomplete('class', documentClasses.map(doc => `${doc.code} - ${doc.name}`));
   
   // Add form submit handler
   elements.form.addEventListener('submit', handleFormSubmit);
@@ -113,14 +125,64 @@ function initializeForm() {
   elements.submitBtn.addEventListener('click', handleFormSubmit);
 }
 
-// Populate site dropdown
-function populateSiteDropdown() {
-  sites.sort((a, b) => a.name.localeCompare(b.name)).forEach(site => {
-    const option = document.createElement('option');
-    option.value = `${site.no}|${site.name}`;
-    option.textContent = `${site.no} - ${site.name}`;
-    elements.site.appendChild(option);
+// Convert select input to autocomplete with manual typing
+function convertToAutocomplete(elementId, items) {
+  const input = document.getElementById(elementId);
+  const originalSelect = input.cloneNode(true);
+  originalSelect.id = `${elementId}-select`;
+  originalSelect.classList.add('hidden');
+  input.parentNode.insertBefore(originalSelect, input.nextSibling);
+  
+  // Set up autocomplete
+  input.addEventListener('input', function() {
+    const val = this.value.trim();
+    closeAllLists();
+    
+    if (!val) {
+      originalSelect.value = '';
+      return;
+    }
+    
+    const filteredItems = items.filter(item => 
+      item.toLowerCase().includes(val.toLowerCase())
+    );
+    
+    if (filteredItems.length === 0) {
+      originalSelect.value = '';
+      return;
+    }
+    
+    const list = document.createElement('div');
+    list.setAttribute('id', `${elementId}-autocomplete-list`);
+    list.setAttribute('class', 'autocomplete-items');
+    this.parentNode.appendChild(list);
+    
+    filteredItems.forEach(item => {
+      const itemElement = document.createElement('div');
+      itemElement.innerHTML = item;
+      itemElement.addEventListener('click', function() {
+        input.value = item;
+        originalSelect.value = item;
+        closeAllLists();
+      });
+      list.appendChild(itemElement);
+    });
   });
+  
+  // Close autocomplete when clicking outside
+  document.addEventListener('click', function(e) {
+    if (e.target !== input) {
+      closeAllLists();
+    }
+  });
+}
+
+// Close all autocomplete lists
+function closeAllLists() {
+  const items = document.getElementsByClassName('autocomplete-items');
+  for (let i = 0; i < items.length; i++) {
+    items[i].parentNode.removeChild(items[i]);
+  }
 }
 
 // Set default date to today
@@ -199,14 +261,53 @@ function validateForm() {
 
 // Get form data as object
 function getFormData() {
-  const [siteNo, siteName] = elements.site.value.split('|');
+  // For site, try to extract the site number from the input
+  let siteNo = '';
+  let siteName = '';
+  
+  // Check if the input matches the pattern "number - name"
+  const siteMatch = elements.site.value.match(/^(\S+)\s*-\s*(.+)$/);
+  if (siteMatch) {
+    siteNo = siteMatch[1];
+    siteName = siteMatch[2];
+  } else {
+    // If not in the standard format, use the whole input as name
+    siteName = elements.site.value;
+    // Try to find a matching site in our list
+    const foundSite = sites.find(site => 
+      site.name.toLowerCase() === elements.site.value.toLowerCase() ||
+      site.no.toLowerCase() === elements.site.value.toLowerCase()
+    );
+    if (foundSite) {
+      siteNo = foundSite.no;
+      siteName = foundSite.name;
+    }
+  }
+  
+  // Similarly for document class
+  let docClass = '';
+  const classMatch = elements.class.value.match(/^(\S+)\s*-\s*/);
+  if (classMatch) {
+    docClass = classMatch[1];
+  } else {
+    // Try to find a matching class in our list
+    const foundClass = documentClasses.find(dc => 
+      dc.name.toLowerCase() === elements.class.value.toLowerCase() ||
+      dc.code.toLowerCase() === elements.class.value.toLowerCase()
+    );
+    if (foundClass) {
+      docClass = foundClass.code;
+    } else {
+      docClass = elements.class.value;
+    }
+  }
   
   return {
     action: 'add',
     from: elements.from.value.trim().toUpperCase(),
     siteNo: encodeURIComponent(siteNo),
     siteName: encodeURIComponent(siteName),
-    class: encodeURIComponent(elements.class.value),
+    class: encodeURIComponent(docClass),
     dateSent: encodeURIComponent(elements.dateSent.value),
     remarks: encodeURIComponent(elements.remarks.value)
   };

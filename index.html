@@ -43,30 +43,18 @@
               <input type="text" id="from" required placeholder="Enter sender name" value="IBA">
             </div>
 
-            <div class="form-group">
+            <div class="form-group autocomplete">
               <label for="site">
                 <i class="fas fa-building"></i> Site
               </label>
-              <select id="site" required>
-                <option value="">-- Select Site --</option>
-                <!-- Options populated by JavaScript -->
-              </select>
+              <input type="text" id="site" required placeholder="Type or select site">
             </div>
 
-            <div class="form-group">
+            <div class="form-group autocomplete">
               <label for="class">
                 <i class="fas fa-tag"></i> Document Class
               </label>
-              <select id="class" required>
-                <option value="">-- Select Class --</option>
-                <option value="LET">LET - Letter</option>
-                <option value="MEM">MEM - Memorandum</option>
-                <option value="REP">REP - Report</option>
-                <option value="CTR">CTR - Contract</option>
-                <option value="NOT">NOT - Notice</option>
-                <option value="WNG">WNG - Warning</option>
-                <option value="TEN">TEN - Tender</option>
-              </select>
+              <input type="text" id="class" required placeholder="Type or select class">
             </div>
 
             <div class="form-group">
@@ -94,7 +82,7 @@
     </main>
 
     <footer class="app-footer">
-      <p>© 2025 IBA Document Management System | v2.1</p>
+      <p>© 2025 IBA Document Management System | v2.2</p>
     </footer>
   </div>
 
