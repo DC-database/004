@@ -139,6 +139,35 @@ body {
   box-shadow: 0 0 0 0.2rem rgba(0, 86, 179, 0.25);
 }
 
+.form-group input.error {
+  border-color: var(--error-color);
+  background-color: rgba(220, 53, 69, 0.05);
+}
+
+.mobile-input-container {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ced4da;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.country-code {
+  padding: 0 1rem;
+  background: #f8f9fa;
+  color: #6c757d;
+  border-right: 1px solid #ced4da;
+  height: 48px;
+  display: flex;
+  align-items: center;
+}
+
+#mobile-input {
+  border: none;
+  border-radius: 0;
+  flex: 1;
+}
+
 select {
   appearance: none;
   -webkit-appearance: none;
@@ -506,12 +535,4 @@ input[type="date"] {
   .autocomplete-items {
     max-height: 120px;
   }
-}
-#class {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 16px;
-  background-color: white;
 }

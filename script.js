@@ -1,137 +1,5 @@
 // Google Apps Script URL
-const scriptURL = 'https://script.google.com/macros/s/AKfycbznnIvZSrF4bz8n6uHXpNkVmaHm-p4DlJOW1z1pZSL4ZED5WTGvMG7RdYWo6coTljIXyA/exec';
-
-// Site data
-const sites = [
-{no: "100", name: "Main Office"},
-{no: "1001", name: "Lusail R17 Tower Maintenance"},
-{no: "1002", name: "Jassem Villa Maintenance"},
-{no: "1003", name: "Ali Al Emadi Villa"},
-{no: "1004", name: "New Dar Al Hekma"},
-{no: "1005", name: "Naif Villa"},
-{no: "1006", name: "AL-Emadi Stone Factory"},
-{no: "1007", name: "Bin Mahmoud 54 Building"},
-{no: "1008", name: "IBA RE Accommodation Maintena"},
-{no: "1009", name: "IBA Labor Camp Maintenance"},
-{no: "1061", name: "M.E Dafna V Maintenance"},
-{no: "1065", name: "IBA Workers Accomm, Store"},
-{no: "1067", name: "Foxhills K06/K14 MAINITINANCE"},
-{no: "1111", name: "Maintenance Projects"},
-{no: "121", name: "Ain Khalid Gate"},
-{no: "122", name: "Concorde Hotel"},
-{no: "123", name: "Labour Camp"},
-{no: "129", name: "Al Arqam Academy"},
-{no: "130", name: "Dar Al Hekma School"},
-{no: "132", name: "Al Hazm Mall"},
-{no: "137.17", name: "Marina Res. 17"},
-{no: "137.19", name: "Marina Res. 19"},
-{no: "139", name: "Hamad Hilal Villa"},
-{no: "140", name: "Foxhills D5-D6"},
-{no: "141", name: "Foxhills MU-E10"},
-{no: "142", name: "Foxhills D37"},
-{no: "144", name: "Marina Res. 16"},
-{no: "145", name: "Old Ghanim Commercial Building"},
-{no: "146", name: "Al Hazm Stone Factory"},
-{no: "147", name: "IBA Interiors Factory"},
-{no: "148", name: "Hamad Rawdat Al Hamam Villa"},
-{no: "149", name: "QAF D-103-01 5 Accommodation"},
-{no: "150", name: "Ali Al Emadi Hilal Villa"},
-{no: "151", name: "Manateq Labour Accommodation"},
-{no: "152", name: "QAF D-110-01"},
-{no: "153", name: "QAF D-313-01 (Dining Hall)"},
-{no: "154", name: "QESC Signal Corps Project"},
-{no: "155", name: "GWC Warehouse & Office Complex"},
-{no: "156", name: "Mohamed Esmael Hilal Villa"},
-{no: "157", name: "Mohamed Esmael Nuija Building"},
-{no: "158", name: "BSQ Accommodation BuildingQESC"},
-{no: "159", name: "QAF D-113-01 (Brooq 1)"},
-{no: "160", name: "Officers Dining Hall at DNB"},
-{no: "161", name: "M.E Dafna Palace"},
-{no: "162", name: "Ibrahim Mosque"},
-{no: "163", name: "Lusail R26"},
-{no: "164", name: "Al Emadi Mosque"},
-{no: "165", name: "IBA Workers Accomm. & Store"},
-{no: "166", name: "Al Shahad Tower"},
-{no: "167", name: "Foxhills K06/K14"},
-{no: "168", name: "Qatar University HAB"},
-{no: "169", name: "Al Arqam Academy 2"},
-{no: "171", name: "Qtefan Island Villa"},
-{no: "172", name: "AlThumama 2 Villas"},
-{no: "173", name: "Azure Towers"},
-{no: "174", name: "New Hilal Majilis"},
-{no: "175", name: " Leonardo Projects  Brooq1"},
-{no: "176", name: "Ashghal Chemical Store"},
-{no: "177", name: "Lusail foxhills muh01, 2 ,3"},
-{no: "178", name: "Lusail WR-RES. 27"},
-{no: "179", name: " Dar Al Hekma Al Khessa"},
-{no: "180", name: "New Dafna Majlis"},
-{no: "181", name: "Abdullah H. Al Emadi Villa"},
-{no: "91", name: "Ninty One Consultancy & Agency"},
-{no: "A 29", name: "Al Asmakh building"},
-{no: "M1", name: "Mohamed Esmael Al Emadi"},
-{no: "M10", name: "Al Emadi Majlis"},
-{no: "M11", name: "IBA Real Estate"},
-{no: "M12", name: "Noaf & Mohamed Ali Al Emadi"},
-{no: "M13", name: "Abdel Wahid Al Emadi"},
-{no: "M132", name: "Al Hazm MAll Maintenance"},
-{no: "M14", name: "Mohamed Abdel Karim Al Emadi"},
-{no: "M147", name: "IBA Interiors Factory - M"},
-{no: "M15", name: "IBA Aluminium"},
-{no: "M16", name: "Hamad Sister Villa (3)"},
-{no: "M161", name: "Mohamed Esmael Dafna Villa"},
-{no: "M163", name: "Lusail R26 Owner"},
-{no: "M166", name: "Al Shahad Tower Maintenance"},
-{no: "M167", name: "M Foxhills K06/K14"},
-{no: "M169", name: "Al Arqam Academy 2 C"},
-{no: "M17", name: "59 Real Estate"},
-{no: "M170", name: "Faisal Al Hammadi Residence"},
-{no: "M172", name: "Al Thumama 2 Villas"},
-{no: "M173", name: "Azure Towers Maints"},
-{no: "M177", name: "Lusail fox hills muh01, 2 ,3"},
-{no: "M178", name: "Lusail WR-RES 27"},
-{no: "M179", name: " Dar Al Hekma Al Khessa M"},
-{no: "M18", name: "IBA  Al-Kiranah Store"},
-{no: "M181", name: "Abdullah H. Al Emadi Villa M"},
-{no: "M2", name: "Abdullah Esmael Al Emadi"},
-{no: "M20", name: "Ali Taleb Villa"},
-{no: "M21", name: "Muntaza Building"},
-{no: "M22", name: "Nuija Building"},
-{no: "M23", name: "Qinwan Villa"},
-{no: "M24", name: "Kheesa 5 Villas"},
-{no: "M25", name: "On Time Real Estate Co."},
-{no: "M26", name: "On Time Delivery"},
-{no: "M27", name: "Coastal Solutions"},
-{no: "M28", name: "Hilal Villa"},
-{no: "M29", name: "IBA Inheritance"},
-{no: "M3", name: "Hassan Esmael Al Emadi"},
-{no: "M30", name: "Um Ghuwailina Building"},
-{no: "M31", name: "Go Do Accommodation"},
-{no: "M32", name: "Hilal 3 Villas"},
-{no: "M33", name: "Mansoura Building"},
-{no: "M34", name: "Ghazal Compound Ain Khaled"},
-{no: "M35", name: "91 Cleaning & Hospitality"},
-{no: "M36", name: "Hilal Villa B71"},
-{no: "M37", name: "Ali Mohamed A.R Al Emadi"},
-{no: "M38", name: "Blink Events Management"},
-{no: "M4", name: "Hamad Mohamed Al Emadi"},
-{no: "M5", name: "IBA Farm"},
-{no: "M6", name: "Mohamed Esmael Farm Villa"},
-{no: "M7", name: "Hamad Al Emadi Winter Camp"},
-{no: "M8", name: "Salman Al Emadi"},
-{no: "M9", name: "Hassan Rafee Al Emadi Villa"},
-{no: "SZRE", name: "Seven Zone Real Estate"}
-];
-
-// Document classes
-const documentClasses = [
-  {code: "LET", name: "Letter"},
-  {code: "MEM", name: "Memorandum"},
-  {code: "REP", name: "Report"},
-  {code: "CTR", name: "Contract"},
-  {code: "NOT", name: "Notice"},
-  {code: "WNG", name: "Warning"},
-  {code: "TEN", name: "Tender"}
-];
+const scriptURL = 'https://script.google.com/macros/s/AKfycbywp9mieNbeMYSP2FvhRf3lAoLIHTngdUh86uLAzjJXcvLpP-De4GBcnnze4Ej8-ubvFA/exec';
 
 // DOM Elements
 const elements = {
@@ -147,7 +15,7 @@ const elements = {
   site: document.getElementById('site'),
   class: document.getElementById('class'),
   dateSent: document.getElementById('dateSent'),
-  remarks: document.getElementById('remarks'),
+  purpose: document.getElementById('purpose'),
   submitBtn: document.getElementById('submit-btn'),
   successMessage: document.getElementById('success-message')
 };
@@ -171,31 +39,38 @@ function showMobileVerification() {
   elements.appContainer.classList.add('hidden');
 }
 
-function showApp() {
+async function showApp() {
   elements.mobileModal.style.display = 'none';
   elements.appContainer.classList.remove('hidden');
-  initializeForm();
-  setDefaultDate();
   
-  elements.submitBtn.addEventListener('touchstart', function(e) {
-    this.classList.add('touch-active');
-  }, {passive: true});
-  
-  elements.submitBtn.addEventListener('touchend', function(e) {
-    this.classList.remove('touch-active');
-  }, {passive: true});
+  // Load sites and document classes before initializing form
+  try {
+    await initializeForm();
+    setDefaultDate();
+    
+    elements.submitBtn.addEventListener('touchstart', function(e) {
+      this.classList.add('touch-active');
+    }, {passive: true});
+    
+    elements.submitBtn.addEventListener('touchend', function(e) {
+      this.classList.remove('touch-active');
+    }, {passive: true});
+  } catch (error) {
+    console.error('Error initializing form:', error);
+    showError('Failed to load form data. Please refresh the page.');
+  }
 }
 
 function verifyMobile() {
-  const mobile = elements.mobileInput.value.trim();
+  const mobile = '974' + elements.mobileInput.value.trim();
   
-  if (!mobile) {
+  if (!elements.mobileInput.value.trim()) {
     showMobileError('Please enter your mobile number');
     return;
   }
   
-  if (!/^[0-9]{8,12}$/.test(mobile)) {
-    showMobileError('Please enter a valid mobile number');
+  if (!/^[0-9]{7,8}$/.test(elements.mobileInput.value.trim())) {
+    showMobileError('Please enter a valid 7 or 8 digit mobile number');
     return;
   }
   
@@ -240,45 +115,60 @@ function showMobileError(message) {
 
 function openWhatsApp() {
   const phone = '50992023';
-  const message = 'Please register my mobile number for IBA Document System access. My number is: ' + elements.mobileInput.value.trim();
+  const message = 'Please register my mobile number for IBA Document System access. My number is: 974' + elements.mobileInput.value.trim();
   const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
   window.open(url, '_blank');
 }
 
-function initializeForm() {
-  convertToAutocomplete('site', sites.map(site => `${site.no} - ${site.name}`));
-  createClassDropdown();
-  
-  elements.form.addEventListener('submit', handleFormSubmit);
-  elements.submitBtn.addEventListener('click', handleFormSubmit);
+async function initializeForm() {
+  try {
+    // Fetch sites and document classes from Google Sheets
+    const [sites, documentClasses] = await Promise.all([
+      fetchSites(),
+      fetchDocumentClasses()
+    ]);
+    
+    convertToAutocomplete('site', sites.map(site => `${site.no} - ${site.name}`));
+    convertToAutocomplete('class', documentClasses.map(docClass => `${docClass.code} - ${docClass.name}`));
+    
+    elements.form.addEventListener('submit', handleFormSubmit);
+    elements.submitBtn.addEventListener('click', handleFormSubmit);
+  } catch (error) {
+    console.error('Error initializing form:', error);
+    throw error;
+  }
 }
 
-function createClassDropdown() {
-  const classSelect = document.createElement('select');
-  classSelect.id = 'class';
-  classSelect.name = 'class';
-  classSelect.required = true;
-  
-  // Add default option
-  const defaultOption = document.createElement('option');
-  defaultOption.value = '';
-  defaultOption.textContent = 'Select Document Class';
-  defaultOption.disabled = true;
-  defaultOption.selected = true;
-  classSelect.appendChild(defaultOption);
-  
-  // Add document class options
-  documentClasses.forEach(docClass => {
-    const option = document.createElement('option');
-    option.value = `${docClass.code} - ${docClass.name}`;
-    option.textContent = `${docClass.code} - ${docClass.name}`;
-    classSelect.appendChild(option);
-  });
-  
-  // Replace the existing input with the select dropdown
-  const classContainer = elements.class.parentNode;
-  classContainer.replaceChild(classSelect, elements.class);
-  elements.class = classSelect; // Update the reference in the elements object
+async function fetchSites() {
+  try {
+    const response = await fetch(`${scriptURL}?action=getSites`);
+    const data = await response.json();
+    
+    if (data.status === 'ok' && data.sites) {
+      return data.sites;
+    } else {
+      throw new Error(data.message || 'Failed to fetch sites');
+    }
+  } catch (error) {
+    console.error('Error fetching sites:', error);
+    throw error;
+  }
+}
+
+async function fetchDocumentClasses() {
+  try {
+    const response = await fetch(`${scriptURL}?action=getDocumentClasses`);
+    const data = await response.json();
+    
+    if (data.status === 'ok' && data.documentClasses) {
+      return data.documentClasses;
+    } else {
+      throw new Error(data.message || 'Failed to fetch document classes');
+    }
+  } catch (error) {
+    console.error('Error fetching document classes:', error);
+    throw error;
+  }
 }
 
 function convertToAutocomplete(elementId, items) {
@@ -390,14 +280,48 @@ function submitRequest() {
 }
 
 function validateForm() {
-  if (!elements.from.value.trim() || 
-      !elements.site.value || 
-      !elements.class.value || 
-      !elements.dateSent.value) {
-    showError('Please fill all required fields.');
-    return false;
+  // Reset all error states
+  document.querySelectorAll('.form-group input, .form-group select').forEach(el => {
+    el.classList.remove('error');
+  });
+
+  let isValid = true;
+
+  if (!elements.from.value.trim()) {
+    elements.from.classList.add('error');
+    isValid = false;
   }
-  return true;
+
+  if (!elements.site.value) {
+    elements.site.classList.add('error');
+    isValid = false;
+  }
+
+  if (!elements.class.value) {
+    elements.class.classList.add('error');
+    isValid = false;
+  }
+
+  if (!elements.dateSent.value) {
+    elements.dateSent.classList.add('error');
+    isValid = false;
+  }
+
+  if (!elements.purpose.value.trim()) {
+    elements.purpose.classList.add('error');
+    isValid = false;
+  }
+
+  if (!isValid) {
+    showError('Please fill all required fields.');
+    // Scroll to first error
+    const firstError = document.querySelector('.error');
+    if (firstError) {
+      firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  return isValid;
 }
 
 function getFormData() {
@@ -410,14 +334,6 @@ function getFormData() {
     siteName = siteMatch[2];
   } else {
     siteName = elements.site.value;
-    const foundSite = sites.find(site => 
-      site.name.toLowerCase() === elements.site.value.toLowerCase() ||
-      site.no.toLowerCase() === elements.site.value.toLowerCase()
-    );
-    if (foundSite) {
-      siteNo = foundSite.no;
-      siteName = foundSite.name;
-    }
   }
   
   let docClass = '';
@@ -425,19 +341,8 @@ function getFormData() {
   if (classMatch) {
     docClass = classMatch[1];
   } else {
-    const foundClass = documentClasses.find(dc => 
-      dc.name.toLowerCase() === elements.class.value.toLowerCase() ||
-      dc.code.toLowerCase() === elements.class.value.toLowerCase()
-    );
-    if (foundClass) {
-      docClass = foundClass.code;
-    } else {
-      docClass = elements.class.value;
-    }
+    docClass = elements.class.value;
   }
-  
-  // Get the verified mobile from session storage
-  const mobile = sessionStorage.getItem('verifiedMobile') || '';
   
   return {
     action: 'add',
@@ -446,8 +351,8 @@ function getFormData() {
     siteName: encodeURIComponent(siteName),
     class: encodeURIComponent(docClass),
     dateSent: encodeURIComponent(elements.dateSent.value),
-    remarks: encodeURIComponent(elements.remarks.value),
-    mobile: encodeURIComponent(mobile) // Add mobile number to the form data
+    remarks: encodeURIComponent(elements.purpose.value),
+    mobile: sessionStorage.getItem('verifiedMobile') || ''
   };
 }
 

@@ -21,7 +21,10 @@
       <div class="modal-body">
         <p>Please enter your registered mobile number to access the system:</p>
         <div class="form-group">
-          <input type="tel" id="mobile-input" placeholder="974XXXXXXXX" pattern="[0-9]{8,12}" required>
+          <div class="mobile-input-container">
+            <span class="country-code">974</span>
+            <input type="tel" id="mobile-input" placeholder="XXXXXXX" pattern="[0-9]{7,8}" required maxlength="8">
+          </div>
         </div>
         <div id="mobile-error" class="error-message hidden"></div>
       </div>
@@ -93,10 +96,10 @@
             </div>
 
             <div class="form-group">
-              <label for="remarks">
-                <i class="fas fa-comment-alt"></i> Remarks (Optional)
+              <label for="purpose">
+                <i class="fas fa-comment-alt"></i> Purpose
               </label>
-              <input type="text" id="remarks" placeholder="Additional notes">
+              <input type="text" id="purpose" required placeholder="Document purpose">
             </div>
 
             <div class="form-actions">
@@ -110,7 +113,7 @@
     </main>
 
     <footer class="app-footer">
-      <p>© 2025 IBA Document Management System | v2.3</p>
+      <p>© 2025 IBA Document Management System | v2.4</p>
     </footer>
   </div>
 
