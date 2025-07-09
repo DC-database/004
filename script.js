@@ -17,21 +17,20 @@ const elements = {
   dateSent: document.getElementById('dateSent'),
   purpose: document.getElementById('purpose'),
   submitBtn: document.getElementById('submit-btn'),
-  successMessage: document.getElementById('success-message')
+  successMessage: document.getElementById('success-message'),
+  goBackBtn: document.getElementById('go-back-btn')
 };
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
-  const verifiedMobile = sessionStorage.getItem('verifiedMobile');
-  
-  if (verifiedMobile) {
-    showApp();
-  } else {
-    showMobileVerification();
-  }
+  showMobileVerification();
   
   elements.verifyBtn.addEventListener('click', verifyMobile);
   elements.whatsappBtn.addEventListener('click', openWhatsApp);
+  
+  if (elements.goBackBtn) {
+    elements.goBackBtn.addEventListener('click', goBack);
+  }
 });
 
 function showMobileVerification() {
@@ -43,7 +42,6 @@ async function showApp() {
   elements.mobileModal.style.display = 'none';
   elements.appContainer.classList.remove('hidden');
   
-  // Load sites and document classes before initializing form
   try {
     await initializeForm();
     setDefaultDate();
@@ -120,9 +118,33 @@ function openWhatsApp() {
   window.open(url, '_blank');
 }
 
+function goBack() {
+  sessionStorage.removeItem('verifiedMobile');
+  
+  // Check if on mobile
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
+  if (isMobile) {
+    // Mobile - redirect to external URL
+    window.location.href = 'https://dc-database.github.io/003/';
+  } else {
+    // Desktop - try to open local file
+    try {
+      // First try direct file access
+      window.location.href = 'portal.html';
+      
+      // Fallback after short delay if the first attempt fails
+      setTimeout(() => {
+        window.history.back();
+      }, 100);
+    } catch (e) {
+      window.history.back();
+    }
+  }
+}
+
 async function initializeForm() {
   try {
-    // Fetch sites and document classes from Google Sheets
     const [sites, documentClasses] = await Promise.all([
       fetchSites(),
       fetchDocumentClasses()
@@ -280,7 +302,6 @@ function submitRequest() {
 }
 
 function validateForm() {
-  // Reset all error states
   document.querySelectorAll('.form-group input, .form-group select').forEach(el => {
     el.classList.remove('error');
   });
@@ -314,7 +335,6 @@ function validateForm() {
 
   if (!isValid) {
     showError('Please fill all required fields.');
-    // Scroll to first error
     const firstError = document.querySelector('.error');
     if (firstError) {
       firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
